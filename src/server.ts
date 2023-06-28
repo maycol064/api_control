@@ -19,7 +19,7 @@ app.use('/ping', pong);
 
 app.use('/api', protect, router);
 
-app.post('/admin', createContractor);
+app.post('/adminnnn', createNewUser);
 
 app.post('/login', login);
 
