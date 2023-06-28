@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ROLS {
+  Contratante
+  Contratista
+  Supervisor
+  Representante_Legal
+  Directivo
+  Admin
+}
+
+model User {
+  id             String        @id @default(uuid())
+  name           String
+  lastname       String
+  username       String        @unique
+  password       String
+  role           ROLS          @default(Contratante)
+  typeDependency String
+  dependency     Dependecy?    @relation(fields: [dependencyId], references: [id]) 
+  dependencyId   String?
+  state          Boolean?
+  Contratist     Contratist?   @relation(fields: [contratistId], references: [id])
+  contratistId   String?
+  Estimations    Estimations[]
+}
+
+model Dependecy {
+  id     String @id @default(uuid())
+  name   String @unique
+  sector String
+  work   Work[]
+  users  User[]
+}
+
+model Work {
+  id                String         @id @default(uuid())
+  name              String
+  location          String
+  contratist        String
+  projects          String
+  financialProgress Int
+  physicalProgress  Int
+  fronProject       FrontProject[]
+  dependency        Dependecy      @relation(fields: [dependencyId], references: [id])
+  dependencyId      String         @unique
+  Contratist        Contratist?    @relation(fields: [contratistId], references: [id])
+  contratistId      String?
+}
+
+model Contratist {
+  id      String @id @default(uuid())
+  company String @unique
+  sector  String
+  users   User[]
+  works   Work[]
+}
+
+model FrontProject {
+  id           String       @id @default(uuid())
+  name         String       @unique
+  contract     String
+  minutas      String
+  estimations  Estimations?
+  reportId     String?
+  report       Report?      @relation(fields: [reportId], references: [id])
+  multimediaId String?
+  multimedia   Multimedia?  @relation(fields: [multimediaId], references: [id])
+  Work         Work?        @relation(fields: [workId], references: [id])
+  workId       String?
+  catalogo     Catalogo?
+}
+
+model Catalogo {
+  id      String       @id @default(uuid())
+  name    String
+  descrip String
+  front   FrontProject @relation(fields: [frontId], references: [id])
+  frontId String       @unique
+  concept Concept[]
+}
+
+model Concept {
+  id         String    @id @default(uuid())
+  name       String
+  ref        String
+  cant       Int
+  price      Float
+  total      Float
+  Catalogo   Catalogo? @relation(fields: [catalogoId], references: [id])
+  catalogoId String?
+}
+
+model Estimations {
+  id                String       @id @default(uuid())
+  date              DateTime     @default(now())
+  frontProjectId    String       @unique
+  frontProject      FrontProject @relation(fields: [frontProjectId], references: [id])
+  numEstimation     Int          @default(autoincrement())
+  period            String
+  formulatedById    String
+  formulatedBy      User         @relation(fields: [formulatedById], references: [id])
+  amount            Float
+  firstAmount       Float
+  lastAmount        Float
+  currentAmount     Float
+  estimatedBalance  Float
+  anticipatedAmount Float
+  currentSubtotal   Float
+  currentIva        Float
+  currentTotal      Float
+  testims           Float
+  advance           Float // Anticipo
+  finalSubtotal     Float
+  finalIva          Float
+  finalRetention    Float
+  finalTotal        Float
+}
+
+model Report {
+  id           String         @id @default(uuid())
+  name         String
+  date         DateTime
+  url          String
+  frontProject FrontProject[]
+}
+
+model Multimedia {
+  id           String         @id @default(uuid())
+  name         String
+  date         DateTime
+  url          String
+  path         String
+  FrontProject FrontProject[]
+}
